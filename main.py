@@ -1,4 +1,10 @@
+""""
+Binary clock with micropython
 
+8x8 dot matrix: clk->GPIO14(D5), din->GPIO13(D7), cs->GPIO15(D8)
+ds1307 RTC: scl->GPIO5(D1), sda->GPIO4(D2)
+
+"""
 from machine import I2C, Pin, SPI
 import max7219 as mx
 import ds1307, bcd
@@ -15,6 +21,33 @@ ds = ds1307.DS1307(i2c)
 def get_time():
   return ds.datetime() #localtime() for internal rtc
   
+class TimeToBCD:
+  
+
+  def __init__(self, time):
+    self.datetime = time #(yy, mm, dd, wday, hh, mm, ss, mill_s)
+    
+    self.month = self.datetime[1]
+    self.day = self.datetime[2]
+    self.hour = self.datetime[4]
+    self.min = self.datetime[5]
+    
+    #convert to BCD
+    self.month = self.to_BCD(self.month)
+    self.day = self.to_BCD(self.day)
+    self.hour= self.to_BCD(self.hour)
+    self.min = self.to_BCD(self.min)
+    
+  def to_BCD(self, intValue):
+    bcd_repr = bcd.BCDConversion(intValue)
+    return bcd_repr
+    
+  def get_time(self):
+    return (self.hour, self.min)
+    
+  def get_date(self):
+    return (self.month, self.day)
+
 def display_time():
   
   #led matrix time array
@@ -52,33 +85,8 @@ def display_time():
       display.pixel(x, y, brightness)
       display.show()
     
-class TimeToBCD:
-  
+    
 
-  def __init__(self, time):
-    self.datetime = time #(yy, mm, dd, wday, hh, mm, ss, mill_s)
-    
-    self.month = self.datetime[1]
-    self.day = self.datetime[2]
-    self.hour = self.datetime[4]
-    self.min = self.datetime[5]
-    
-    #convert to BCD
-    self.month = self.to_BCD(self.month)
-    self.day = self.to_BCD(self.day)
-    self.hour= self.to_BCD(self.hour)
-    self.min = self.to_BCD(self.min)
-    
-  def to_BCD(self, intValue):
-    bcd_repr = bcd.BCDConversion(intValue)
-    return bcd_repr
-    
-  def get_time(self):
-    return (self.hour, self.min)
-    
-  def get_date(self):
-    return (self.month, self.day)
-    
-    
-display_time()
-#display.pixel(y,x,1)
+while True:    
+  display_time()
+  sleep(60)
