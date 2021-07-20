@@ -23,7 +23,6 @@ def get_time():
   
 class TimeToBCD:
   
-
   def __init__(self, time):
     self.datetime = time #(yy, mm, dd, wday, hh, mm, ss, mill_s)
     
@@ -85,8 +84,6 @@ def display_time():
       display.pixel(x, y, brightness)
       display.show()
     
-    
-
 while True:    
   display_time()
   sleep(60)
